@@ -11,6 +11,9 @@ Claude Agent SDK support:
 from dataclasses import dataclass
 from typing import Dict, Optional
 
+# Cache agent IDs per buddy/model for stateful conversations
+AGENT_CACHE: Dict[str, str] = {}
+
 
 @dataclass
 class LLMConfig:
@@ -53,31 +56,39 @@ class ClaudeClient(LLMClient):
         try:
             # Try Agent SDK first
             if self.agent_api:
+                cache_key = f"{buddy_name}:{self.model}"
+                if not self.agent_id and cache_key in AGENT_CACHE:
+                    self.agent_id = AGENT_CACHE[cache_key]
                 if not self.agent_id:
                     try:
                         agent = self.agent_api.create(
                             name=buddy_name,
                             model=self.model,
                             instructions=persona_prompt,
+                            tools=[],  # no tools wired yet
                         )
                         self.agent_id = getattr(agent, "id", None)
+                        if self.agent_id:
+                            AGENT_CACHE[cache_key] = self.agent_id
                     except Exception as agent_err:
-                        # Fall through to messages; keep note
                         agent_err_msg = str(agent_err)
                         if "not_found" not in agent_err_msg:
-                            # If it's not a model error, return
                             return f"[Claude agent error] {agent_err_msg}"
                 if self.agent_id:
-                    # Agent SDK message call; signature may evolve—handle broadly.
-                    msg = self.agent_api.messages.create(
-                        agent_id=self.agent_id,
-                        messages=[{"role": "user", "content": user_text}],
-                        max_output_tokens=256,
-                    )
-                    content = getattr(msg, "content", None)
-                    if content and isinstance(content, list) and hasattr(content[0], "text"):
-                        return content[0].text
-                    return str(msg)
+                    try:
+                        msg = self.agent_api.messages.create(
+                            agent_id=self.agent_id,
+                            messages=[{"role": "user", "content": user_text}],
+                            max_output_tokens=256,
+                        )
+                        content = getattr(msg, "content", None)
+                        if content and isinstance(content, list) and hasattr(content[0], "text"):
+                            return content[0].text
+                        return str(msg)
+                    except Exception:
+                        # Clear cache on agent errors and fall back
+                        AGENT_CACHE.pop(cache_key, None)
+                        self.agent_id = None
 
             # Fallback to plain messages API with model fallbacks
             candidates = [
