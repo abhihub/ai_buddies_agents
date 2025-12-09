@@ -24,7 +24,7 @@ python3 -m venv .venv
 - `src/aibuddies/cli.py` — argument parsing and command handlers (stubs).
 - `src/aibuddies/buddies.py` — Buddy model and JSON-backed store.
 - `src/aibuddies/docs.py` — per-buddy doc storage stubs.
-- `src/aibuddies/runtime.py` — runtime controller stub (tracks running buddies, opens chat window).
+- `src/aibuddies/runtime.py` — runtime controller stub (tracks running buddies, opens chat window). `status` reports running buddies.
 - `src/aibuddies/llm.py` — LLM adapter (Claude/OpenAI preference with Dummy fallback).
 - `src/aibuddies/context.py` — stub context collector.
 - `src/aibuddies/buddies.py` — buddy schema (now includes autorun_cron stub).

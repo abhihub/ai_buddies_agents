@@ -50,7 +50,10 @@ class RuntimeManager:
         return False
 
     def status(self) -> Dict[str, str]:
-        return {name: f"running (interval={b.autorun_interval})" for name, b in self.running.items()}
+        return {
+            name: f"running (interval={b.autorun_interval}, schedule={len(b.schedule)} entries)"
+            for name, b in self.running.items()
+        }
 
     def send_message(self, buddy_name: str, text: str) -> str:
         return f"[stub] sent message to {buddy_name}: {text}"
