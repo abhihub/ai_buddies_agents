@@ -12,6 +12,7 @@ python3 -m venv .venv
 - LLM: prefers Claude if `claude_api_key` is set, then OpenAI if `openai_api_key` is set; otherwise falls back to `DummyLLM`. Claude path uses Agent SDK if available in the `anthropic` client; otherwise plain messages. Install `anthropic` or `openai` SDKs for real calls. System prompt + buddy prompt are combined before sending. Default model: `claude-3-5-sonnet-20240620` (override via `--model`); falls back through haiku/opus if a model is not found.
 - Context: `context_sources` per buddy (e.g., screenshot/window/clipboard/docs) currently stubbed; included as text in the user payload.
 - Proactive loop: scheduler ticks every minute; fires proactive check-ins based on `autorun_interval` (1m/2m/5m/1h/2h/5h). Cron stub not implemented yet.
+- Fixed schedule: `schedule` entries like `HH:MM|Message` enqueue messages once per day when the time matches; chat loop prints them via a background thread.
 
 ## Setup
 - From repo root: `python -m pip install -e .` (uses `pyproject.toml` with src/ layout).

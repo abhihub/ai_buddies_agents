@@ -93,6 +93,9 @@ def cmd_run(args: argparse.Namespace) -> None:
     if args.cron:
         buddy.autorun_cron = args.cron
         store.update(buddy.name, {"autorun_cron": args.cron})
+    if args.schedule:
+        buddy.schedule = args.schedule
+        store.update(buddy.name, {"schedule": args.schedule})
     note = runtime.start(buddy, every=args.every, once=args.once)
     print(note)
 
@@ -128,7 +131,20 @@ def cmd_chat(args: argparse.Namespace) -> None:
         return
     # Ensure runtime knows about this buddy for ask() logic.
     runtime.running.setdefault(buddy.name, buddy)
+    runtime._ensure_scheduler()
     print(f"Chatting with {buddy.name} {buddy.emoji}. Ctrl+C to exit.")
+    import threading
+    import time as _time
+
+    def drain_printer() -> None:
+        while True:
+            msgs = runtime.drain_queue(buddy.name)
+            for m in msgs:
+                print(f"[{buddy.name}] {m}")
+            _time.sleep(5)
+
+    t = threading.Thread(target=drain_printer, daemon=True)
+    t.start()
     try:
         while True:
             user_text = input("> ").strip()
@@ -244,6 +260,7 @@ def build_parser() -> argparse.ArgumentParser:
     p_run.add_argument("--name", required=True)
     p_run.add_argument("--every", help="Override interval")
     p_run.add_argument("--cron", help="Experimental cron string (not implemented)")
+    p_run.add_argument("--schedule", nargs="+", help='Fixed times, format "HH:MM|Message"')
     p_run.add_argument("--once", action="store_true", help="Run a single cycle")
     p_run.set_defaults(func=cmd_run)
 

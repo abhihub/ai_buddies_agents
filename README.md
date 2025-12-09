@@ -13,6 +13,7 @@ Let non-technical users spin up an AI agent with a single prompt and a couple of
 - LLM adapter: prefers Claude (Agent SDK if present), then OpenAI, else Dummy echo. Default model: `claude-3-5-sonnet-20240620` (override with `--model`). Falls back through haiku/opus if a model is not found.
 - Context sources (stub): pass `--context` (e.g., `screenshot window clipboard docs`) and they’re included as a text block until real collectors are wired.
 - Proactive loop (minimal): `run` starts a scheduler that triggers a proactive check-in based on `--every` (1m/2m/5m/1h/2h/5h). Cron flag is stubbed.
+- Fixed-time schedule: `--schedule "06:00|Wake up" "14:00|How was lunch?"` enqueues messages at matching local HH:MM; printed into chat window via background thread.
 
 ## Quick start
 ```bash
@@ -30,6 +31,8 @@ python -m aibuddies chat --name Doctor
 
 # proactive interval (e.g., 1h check-ins)
 python -m aibuddies run --name GymCoach --every 1h
+# fixed times (HH:MM|Message)
+python -m aibuddies run --name GymCoach --schedule "06:00|Good morning. Drink water." "14:00|How was lunch?"
 
 Run tests (stdlib unittest, no deps):
 PYTHONPATH=src python -m unittest

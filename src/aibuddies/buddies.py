@@ -17,6 +17,7 @@ class Buddy:
     emoji: str = "🤖"
     autorun_interval: str = "manual"
     autorun_cron: str = ""  # optional cron-like string, e.g., "0 9 * * *"
+    schedule: List[str] = field(default_factory=list)  # entries like "06:00|Good morning"
     screenshot: bool = False
     clipboard: bool = False
     context_sources: List[str] = field(default_factory=list)

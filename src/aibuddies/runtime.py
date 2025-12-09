@@ -6,7 +6,7 @@ import subprocess
 import sys
 import time
 from pathlib import Path
-from typing import Dict, Optional
+from typing import Dict, List, Optional
 
 from .buddies import Buddy
 from .config import get_config, Paths
@@ -32,6 +32,8 @@ class RuntimeManager:
         self._scheduler_thread = None
         self._stop_scheduler = False
         self._last_tick: Dict[str, float] = {}
+        self._message_queue: Dict[str, List[str]] = {}
+        self._schedule_sent: Dict[str, Dict[str, str]] = {}  # buddy -> time_str -> yyyymmdd
 
     def start(self, buddy: Buddy, every: Optional[str] = None, once: bool = False) -> str:
         self.running[buddy.name] = buddy
@@ -69,6 +71,14 @@ class RuntimeManager:
         user_payload = context_block + text
         return client.ask(buddy_name, system_plus_persona, user_payload)
 
+    def enqueue(self, buddy_name: str, message: str) -> None:
+        self._message_queue.setdefault(buddy_name, []).append(message)
+
+    def drain_queue(self, buddy_name: str) -> List[str]:
+        msgs = self._message_queue.get(buddy_name, [])
+        self._message_queue[buddy_name] = []
+        return msgs
+
     def proactive_tick(self) -> None:
         """
         Iterate running buddies and trigger proactive prompts based on interval.
@@ -76,19 +86,35 @@ class RuntimeManager:
         Cron-like strings are not implemented yet.
         """
         now = time.time()
+        today = time.strftime("%Y%m%d", time.localtime(now))
         for buddy in list(self.running.values()):
             interval = buddy.autorun_interval
             if interval in ("manual", "", None):
-                continue
-            seconds = self._interval_to_seconds(interval)
-            if seconds is None:
-                continue
-            last = self._last_tick.get(buddy.name, 0)
-            if now - last >= seconds:
-                # fire a proactive prompt
-                prompt = "It's time to check in. Share a quick update or I'll suggest something."
-                self.ask(buddy.name, prompt)
-                self._last_tick[buddy.name] = now
+                pass
+            else:
+                seconds = self._interval_to_seconds(interval)
+                if seconds is not None:
+                    last = self._last_tick.get(buddy.name, 0)
+                    if now - last >= seconds:
+                        prompt = "It's time to check in. Share a quick update or I'll suggest something."
+                        self.enqueue(buddy.name, prompt)
+                        self._last_tick[buddy.name] = now
+
+            # Fixed schedule entries HH:MM|text
+            if buddy.schedule:
+                sent_map = self._schedule_sent.setdefault(buddy.name, {})
+                hhmm_now = time.strftime("%H:%M", time.localtime(now))
+                for entry in buddy.schedule:
+                    if "|" in entry:
+                        ts, msg = entry.split("|", 1)
+                    else:
+                        ts, msg = entry, entry
+                    ts = ts.strip()
+                    if ts == hhmm_now:
+                        last_sent_date = sent_map.get(ts, "")
+                        if last_sent_date != today:
+                            self.enqueue(buddy.name, msg.strip())
+                            sent_map[ts] = today
 
     @staticmethod
     def _interval_to_seconds(interval: str) -> Optional[int]:
