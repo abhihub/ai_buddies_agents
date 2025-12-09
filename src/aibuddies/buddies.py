@@ -8,16 +8,17 @@ from .config import Paths, load_json, save_json
 @dataclass
 class Buddy:
     name: str
+    persona_prompt: str
     system_prompt: str = (
         "You are AI Buddies runtime. Be concise, helpful, and safe. "
         "Always confirm risky actions. Stay on-task for this buddy's role."
     )
-    persona_prompt: str
     model: str = "claude-3.5-sonnet"
     emoji: str = "🤖"
     autorun_interval: str = "manual"
     screenshot: bool = False
     clipboard: bool = False
+    context_sources: List[str] = field(default_factory=list)
     docs_enabled: bool = False
     doc_privacy: Dict[str, Any] = field(default_factory=lambda: {
         "redact_pii_default": True,

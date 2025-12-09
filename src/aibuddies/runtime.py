@@ -9,6 +9,7 @@ from typing import Dict, Optional
 
 from .buddies import Buddy
 from .config import get_config, Paths
+from .context import gather_context
 from .llm import build_client
 
 
@@ -53,8 +54,14 @@ class RuntimeManager:
         if not buddy:
             return f"{buddy_name} is not running. Start it with `aibuddies run --name {buddy_name}`."
         client = build_client(cfg, buddy.model)
+        context = gather_context(buddy)
+        context_block = ""
+        if context:
+            lines = [f"- {k}: {v}" for k, v in context.items()]
+            context_block = "Context:\n" + "\n".join(lines) + "\n\n"
         system_plus_persona = f"{buddy.system_prompt}\n\n{buddy.persona_prompt}"
-        return client.ask(buddy_name, system_plus_persona, text)
+        user_payload = context_block + text
+        return client.ask(buddy_name, system_plus_persona, user_payload)
 
     def _open_chat_window(self, buddy_name: str) -> str:
         """

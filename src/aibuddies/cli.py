@@ -47,6 +47,7 @@ def cmd_create(args: argparse.Namespace) -> None:
         autorun_interval=args.every,
         screenshot=args.screenshot,
         clipboard=args.clipboard,
+        context_sources=args.context or [],
         docs_enabled=args.docs,
     )
     store.create(buddy)
@@ -62,13 +63,14 @@ def cmd_delete(args: argparse.Namespace) -> None:
 
 def cmd_edit(args: argparse.Namespace) -> None:
     updates = {}
-    for field in ("prompt", "system_prompt", "model", "every", "screenshot", "clipboard", "docs"):
+    for field in ("prompt", "system_prompt", "model", "every", "screenshot", "clipboard", "docs", "context"):
         val = getattr(args, field)
         if val is not None:
             key = "persona_prompt" if field == "prompt" else (
                 "system_prompt" if field == "system_prompt" else (
-                "autorun_interval" if field == "every" else field
-            ))
+                "autorun_interval" if field == "every" else (
+                "context_sources" if field == "context" else field
+            )))
             updates[key] = val
     if not updates:
         print("No updates provided.")
@@ -215,6 +217,7 @@ def build_parser() -> argparse.ArgumentParser:
     p_create.add_argument("--every", default="manual", help="Autorun interval (manual, 1m, 5m, 1h, etc)")
     p_create.add_argument("--screenshot", action="store_true", help="Enable screenshots")
     p_create.add_argument("--clipboard", action="store_true", help="Enable clipboard access")
+    p_create.add_argument("--context", nargs="+", help="Context sources (e.g., screenshot window clipboard docs)")
     p_create.add_argument("--docs", action="store_true", help="Enable docs for this buddy")
     p_create.set_defaults(func=cmd_create)
 
@@ -231,6 +234,7 @@ def build_parser() -> argparse.ArgumentParser:
     p_edit.add_argument("--screenshot", type=bool)
     p_edit.add_argument("--clipboard", type=bool)
     p_edit.add_argument("--docs", type=bool)
+    p_edit.add_argument("--context", nargs="+", help="Replace context sources list")
     p_edit.set_defaults(func=cmd_edit)
 
     p_run = sub.add_parser("run", help="Run a buddy (starts loop)")

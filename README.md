@@ -11,6 +11,7 @@ Let non-technical users spin up an AI agent with a single prompt and a couple of
 - Chat/ask one-shot; docs add/list/remove/clear per buddy.
 - JSON storage in `~/.aibuddies`; CLI entrypoint `python -m aibuddies`.
 - LLM adapter: prefers Claude (Agent SDK if present), then OpenAI, else Dummy echo.
+- Context sources (stub): pass `--context` (e.g., `screenshot window clipboard docs`) and they’re included as a text block until real collectors are wired.
 
 ## Quick start
 ```bash
@@ -25,6 +26,9 @@ python -m aibuddies create --name Doctor --prompt "You are a cautious doctor." -
 python -m aibuddies run --name Doctor   # opens chat window if possible
 # or manually:
 python -m aibuddies chat --name Doctor
+
+Run tests (stdlib unittest, no deps):
+PYTHONPATH=src python -m unittest
 ```
 
 ## CLI commands (stub)
