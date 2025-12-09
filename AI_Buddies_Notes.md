@@ -9,7 +9,7 @@ python3 -m venv .venv
 - Commands (stubs): manage buddies (`list`, `create`, `edit`, `delete`, `run`, `stop`, `status`, `config set/show`), interact (`chat`, `ask`, `send`), docs (`docs add/list/remove/clear/status`).
 - Storage: `~/.aibuddies/config.json` for config; `~/.aibuddies/buddies.json` for buddies; docs per buddy in `~/.aibuddies/docs/<buddy>/`.
 - Runtime: stub `RuntimeManager` starts buddies and tries to open a new terminal window for `chat` (macOS via `osascript`, Linux via common terminals). Falls back to printing the command if it can’t auto-open.
-- LLM: prefers Claude if `claude_api_key` is set, then OpenAI if `openai_api_key` is set; otherwise falls back to `DummyLLM`. Claude path uses Agent SDK if available in the `anthropic` client; otherwise plain messages. Install `anthropic` or `openai` SDKs for real calls. System prompt + buddy prompt are combined before sending.
+- LLM: prefers Claude if `claude_api_key` is set, then OpenAI if `openai_api_key` is set; otherwise falls back to `DummyLLM`. Claude path uses Agent SDK if available in the `anthropic` client; otherwise plain messages. Install `anthropic` or `openai` SDKs for real calls. System prompt + buddy prompt are combined before sending. Default model: `claude-3-5-sonnet-20241022` (override via `--model`).
 - Context: `context_sources` per buddy (e.g., screenshot/window/clipboard/docs) currently stubbed; included as text in the user payload.
 
 ## Setup

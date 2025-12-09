@@ -75,8 +75,8 @@ class ClaudeClient(LLMClient):
             resp = self.client.messages.create(
                 model=self.model,
                 max_tokens=256,
+                system=persona_prompt,
                 messages=[
-                    {"role": "system", "content": persona_prompt},
                     {"role": "user", "content": user_text},
                 ],
             )
@@ -86,7 +86,10 @@ class ClaudeClient(LLMClient):
             billing_hint = ""
             if "credit balance is too low" in msg or "insufficient" in msg.lower():
                 billing_hint = " (check Claude billing/credits)"
-            return f"[Claude error]{billing_hint} {msg}"
+            model_hint = ""
+            if "not_found" in msg or "model" in msg:
+                model_hint = " (try claude-3-5-sonnet-20241022 or claude-3-5-haiku-20241022)"
+            return f"[Claude error]{billing_hint}{model_hint} {msg}"
 
 
 class OpenAIClient(LLMClient):
