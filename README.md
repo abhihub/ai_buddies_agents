@@ -16,6 +16,7 @@ Let non-technical users spin up an AI agent with a single prompt and a couple of
 - Fixed-time schedule: `--schedule "06:00|Wake up" "14:00|How was lunch?"` enqueues messages at matching local HH:MM; printed into chat window via background thread.
 - Auto-schedule: if no schedule is provided, a heuristic is generated from the buddy prompt (e.g., GymCoach gets morning/lunch/gym pings).
 - Status: `python -m aibuddies status` reads persisted running state (tracks run/chat starts across processes).
+- Show schedules: `python -m aibuddies schedule show --name GymCoach`
 
 ## Quick start
 ```bash

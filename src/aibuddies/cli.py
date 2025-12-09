@@ -211,6 +211,22 @@ def cmd_docs_status(args: argparse.Namespace) -> None:
     print(f"Docs: {status['count']} file(s). {status['files']}")
 
 
+def cmd_schedule_show(args: argparse.Namespace) -> None:
+    buddy = store.get(args.name)
+    if not buddy:
+        print(f"Buddy {args.name} not found.")
+        return
+    if not buddy.schedule:
+        print("No schedule set for this buddy.")
+        return
+    for entry in buddy.schedule:
+        if "|" in entry:
+            ts, msg = entry.split("|", 1)
+            print(f"{ts.strip()} -> {msg.strip()}")
+        else:
+            print(entry)
+
+
 def cmd_config_set(args: argparse.Namespace) -> None:
     set_config(args.key, args.value)
     print(f"Set {args.key}.")
@@ -317,6 +333,13 @@ def build_parser() -> argparse.ArgumentParser:
     d_status = docs_sub.add_parser("status", help="Docs status")
     d_status.add_argument("--name", required=True)
     d_status.set_defaults(func=cmd_docs_status)
+
+    # Schedule
+    p_sched = sub.add_parser("schedule", help="View schedules")
+    sched_sub = p_sched.add_subparsers(dest="sched_cmd")
+    s_show = sched_sub.add_parser("show", help="Show schedule entries for a buddy")
+    s_show.add_argument("--name", required=True)
+    s_show.set_defaults(func=cmd_schedule_show)
 
     # Config
     p_cfg = sub.add_parser("config", help="Set or show config")
