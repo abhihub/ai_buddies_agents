@@ -13,7 +13,7 @@ class Buddy:
         "You are AI Buddies runtime. Be concise, helpful, and safe. "
         "Always confirm risky actions. Stay on-task for this buddy's role."
     )
-    model: str = "claude-3-5-sonnet-20241022"
+    model: str = "claude-3-5-sonnet-20240620"
     emoji: str = "🤖"
     autorun_interval: str = "manual"
     screenshot: bool = False

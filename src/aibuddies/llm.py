@@ -54,12 +54,19 @@ class ClaudeClient(LLMClient):
             # Try Agent SDK first
             if self.agent_api:
                 if not self.agent_id:
-                    agent = self.agent_api.create(
-                        name=buddy_name,
-                        model=self.model,
-                        instructions=persona_prompt,
-                    )
-                    self.agent_id = getattr(agent, "id", None)
+                    try:
+                        agent = self.agent_api.create(
+                            name=buddy_name,
+                            model=self.model,
+                            instructions=persona_prompt,
+                        )
+                        self.agent_id = getattr(agent, "id", None)
+                    except Exception as agent_err:
+                        # Fall through to messages; keep note
+                        agent_err_msg = str(agent_err)
+                        if "not_found" not in agent_err_msg:
+                            # If it's not a model error, return
+                            return f"[Claude agent error] {agent_err_msg}"
                 if self.agent_id:
                     # Agent SDK message call; signature may evolve—handle broadly.
                     msg = self.agent_api.messages.create(
@@ -71,16 +78,35 @@ class ClaudeClient(LLMClient):
                     if content and isinstance(content, list) and hasattr(content[0], "text"):
                         return content[0].text
                     return str(msg)
-            # Fallback to plain messages API
-            resp = self.client.messages.create(
-                model=self.model,
-                max_tokens=256,
-                system=persona_prompt,
-                messages=[
-                    {"role": "user", "content": user_text},
-                ],
-            )
-            return resp.content[0].text if getattr(resp, "content", None) else "[empty response]"
+
+            # Fallback to plain messages API with model fallbacks
+            candidates = [
+                self.model,
+                "claude-3-5-sonnet-20240620",
+                "claude-3-5-haiku-20241022",
+                "claude-3-5-haiku-20240620",
+                "claude-3-opus-20240229",
+            ]
+            seen = set()
+            last_err = ""
+            for m in candidates:
+                if m in seen:
+                    continue
+                seen.add(m)
+                try:
+                    resp = self.client.messages.create(
+                        model=m,
+                        max_tokens=256,
+                        system=persona_prompt,
+                        messages=[
+                            {"role": "user", "content": user_text},
+                        ],
+                    )
+                    return resp.content[0].text if getattr(resp, "content", None) else "[empty response]"
+                except Exception as e:
+                    last_err = str(e)
+                    continue
+            raise RuntimeError(last_err or "unknown Claude error")
         except Exception as e:
             msg = str(e)
             billing_hint = ""
@@ -88,7 +114,7 @@ class ClaudeClient(LLMClient):
                 billing_hint = " (check Claude billing/credits)"
             model_hint = ""
             if "not_found" in msg or "model" in msg:
-                model_hint = " (try claude-3-5-sonnet-20241022 or claude-3-5-haiku-20241022)"
+                model_hint = " (tried fallbacks: sonnet-20240620, haiku-20241022/20240620, opus-20240229)"
             return f"[Claude error]{billing_hint}{model_hint} {msg}"
 
 

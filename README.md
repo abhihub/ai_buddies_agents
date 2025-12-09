@@ -10,7 +10,7 @@ Let non-technical users spin up an AI agent with a single prompt and a couple of
 - Run a buddy; opens a terminal window for chat (macOS/Terminal or falls back to manual).
 - Chat/ask one-shot; docs add/list/remove/clear per buddy.
 - JSON storage in `~/.aibuddies`; CLI entrypoint `python -m aibuddies`.
- - LLM adapter: prefers Claude (Agent SDK if present), then OpenAI, else Dummy echo. Default model: `claude-3-5-sonnet-20241022` (override with `--model`).
+- LLM adapter: prefers Claude (Agent SDK if present), then OpenAI, else Dummy echo. Default model: `claude-3-5-sonnet-20240620` (override with `--model`). Falls back through haiku/opus if a model is not found.
 - Context sources (stub): pass `--context` (e.g., `screenshot window clipboard docs`) and they’re included as a text block until real collectors are wired.
 
 ## Quick start
