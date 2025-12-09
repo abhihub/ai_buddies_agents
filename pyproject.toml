@@ -1,0 +1,19 @@
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "aibuddies"
+version = "0.0.1"
+description = "AI Buddies CLI (stub)"
+readme = "AI_Buddies_Notes.md"
+requires-python = ">=3.9"
+authors = [{name = "AI Buddies"}]
+dependencies = [
+  # Optional: install anthropic for Claude support
+  # Optional: install openai for OpenAI support
+]
+
+[tool.setuptools]
+package-dir = {"" = "src"}
+packages = ["aibuddies"]

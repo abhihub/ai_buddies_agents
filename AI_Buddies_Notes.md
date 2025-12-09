@@ -1,0 +1,39 @@
+# AI Buddies Notes (Stub CLI)
+python3 -m venv .venv
+  - source .venv/bin/activate
+  - python -m pip install -e .
+  - Then run: python -m aibuddies create --name Doctor --prompt "You are a cautious doctor." --docs
+  
+## What exists now
+- Python package under `src/aibuddies/` with CLI entrypoint (`python -m aibuddies`).
+- Commands (stubs): manage buddies (`list`, `create`, `edit`, `delete`, `run`, `stop`, `status`, `config set/show`), interact (`chat`, `ask`, `send`), docs (`docs add/list/remove/clear/status`).
+- Storage: `~/.aibuddies/config.json` for config; `~/.aibuddies/buddies.json` for buddies; docs per buddy in `~/.aibuddies/docs/<buddy>/`.
+- Runtime: stub `RuntimeManager` starts buddies and tries to open a new terminal window for `chat` (macOS via `osascript`, Linux via common terminals). Falls back to printing the command if it can’t auto-open.
+- LLM: prefers Claude if `claude_api_key` is set, then OpenAI if `openai_api_key` is set; otherwise falls back to `DummyLLM`. Claude path uses Agent SDK if available in the `anthropic` client; otherwise plain messages. Install `anthropic` or `openai` SDKs for real calls. System prompt + buddy prompt are combined before sending.
+
+## Setup
+- From repo root: `python -m pip install -e .` (uses `pyproject.toml` with src/ layout).
+- Or without install: run with `PYTHONPATH=src python -m aibuddies ...` from repo root.
+- To use real LLMs, install SDKs: `python -m pip install anthropic` for Claude, `python -m pip install openai` for OpenAI (in your virtualenv).
+
+## Key files
+- `src/aibuddies/cli.py` — argument parsing and command handlers (stubs).
+- `src/aibuddies/buddies.py` — Buddy model and JSON-backed store.
+- `src/aibuddies/docs.py` — per-buddy doc storage stubs.
+- `src/aibuddies/runtime.py` — runtime controller stub (tracks running buddies, opens chat window).
+- `src/aibuddies/llm.py` — LLM adapter (Claude/OpenAI preference with Dummy fallback).
+- `src/aibuddies/config.py` — config load/save helpers.
+- `src/aibuddies/__main__.py` — CLI entrypoint.
+
+## CLI usage (stub)
+- Create: `python -m aibuddies create --name Doctor --prompt "You are a cautious doctor." --docs`
+- Run (prints stub): `python -m aibuddies run --name Doctor`
+- Chat (separate terminal): `python -m aibuddies chat --name Doctor`
+- Ask once: `python -m aibuddies ask --name Doctor "Should I take zinc?"`
+- Docs: `python -m aibuddies docs add --name Doctor ~/med_history.pdf`; list/status/remove/clear via subcommands.
+- Config keys (API keys, etc.): `python -m aibuddies config set claude_api_key YOUR_KEY`; show with `python -m aibuddies config show`.
+
+## Pending work
+- Real runtime/daemon + IPC; auto-open a new terminal window/tab for chat on `run`.
+- Hook Claude Agents/OpenAI clients into `runtime.ask/send` and add tool routing/safety.
+- Proper doc indexing/retrieval (PII redaction, embeddings, offline mode), pack import/export, voice commands.
