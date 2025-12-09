@@ -2,6 +2,9 @@
 
 CLI wrapper around Claude Agent SDK/OpenAI with “Buddy” presets that run locally. Current state is a stub with basic commands; wiring to Claude Agents is partly implemented with fallbacks.
 
+## Why
+Let non-technical users spin up an AI agent with a single prompt and a couple of optional toggles. The agent picks sane defaults (models, tools, privacy, schedules) based on the prompt so users don’t have to configure anything beyond their intent.
+
 ## Features (current)
 - Create/list/edit/delete buddies with persona + shared system prompt.
 - Run a buddy; opens a terminal window for chat (macOS/Terminal or falls back to manual).
