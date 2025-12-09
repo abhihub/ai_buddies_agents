@@ -137,6 +137,7 @@ def cmd_chat(args: argparse.Namespace) -> None:
     # Ensure runtime knows about this buddy for ask() logic.
     runtime.running.setdefault(buddy.name, buddy)
     runtime._ensure_scheduler()
+    runtime._mark_running(buddy, source="chat")
     print(f"Chatting with {buddy.name} {buddy.emoji}. Ctrl+C to exit.")
     import threading
     import time as _time

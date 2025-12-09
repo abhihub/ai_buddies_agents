@@ -9,7 +9,7 @@ from pathlib import Path
 from typing import Dict, List, Optional
 
 from .buddies import Buddy
-from .config import get_config, Paths
+from .config import get_config, Paths, load_json, save_json
 from .context import gather_context
 from .llm import build_client
 
@@ -34,6 +34,7 @@ class RuntimeManager:
         self._last_tick: Dict[str, float] = {}
         self._message_queue: Dict[str, List[str]] = {}
         self._schedule_sent: Dict[str, Dict[str, str]] = {}  # buddy -> time_str -> yyyymmdd
+        self._running_state = self._load_running()
 
     def start(self, buddy: Buddy, every: Optional[str] = None, once: bool = False) -> str:
         self.running[buddy.name] = buddy
@@ -41,18 +42,28 @@ class RuntimeManager:
         spawn_note = self._open_chat_window(buddy.name)
         if not once:
             self._ensure_scheduler()
+        self._mark_running(buddy, source="run")
         return f"Started {buddy.name} with interval={mode}. {spawn_note}"
 
     def stop(self, name: str) -> bool:
         if name in self.running:
             self.running.pop(name)
-            return True
-        return False
+        removed = self._running_state.pop(name, None) is not None
+        self._save_running()
+        return name in self.running or removed
 
     def status(self) -> Dict[str, str]:
+        # Combine in-process running and persisted running file
+        all_states = dict(self._running_state)
+        for name, buddy in self.running.items():
+            all_states[name] = {
+                "interval": buddy.autorun_interval,
+                "schedule_len": len(buddy.schedule),
+                "source": "current",
+            }
         return {
-            name: f"running (interval={b.autorun_interval}, schedule={len(b.schedule)} entries)"
-            for name, b in self.running.items()
+            name: f"running (interval={info.get('interval')}, schedule={info.get('schedule_len')} entries, source={info.get('source')})"
+            for name, info in all_states.items()
         }
 
     def send_message(self, buddy_name: str, text: str) -> str:
@@ -145,6 +156,23 @@ class RuntimeManager:
 
         self._scheduler_thread = threading.Thread(target=loop, daemon=True)
         self._scheduler_thread.start()
+
+    def _load_running(self) -> Dict[str, Dict[str, str]]:
+        data = load_json(self.paths.running_file)
+        return data.get("running", {})
+
+    def _save_running(self) -> None:
+        save_json(self.paths.running_file, {"running": self._running_state})
+
+    def _mark_running(self, buddy: Buddy, source: str) -> None:
+        self._running_state[buddy.name] = {
+            "interval": buddy.autorun_interval,
+            "schedule_len": len(buddy.schedule),
+            "source": source,
+            "pid": str(os.getpid()),
+            "started_at": str(time.time()),
+        }
+        self._save_running()
 
     def _open_chat_window(self, buddy_name: str) -> str:
         """

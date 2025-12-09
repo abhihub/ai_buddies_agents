@@ -17,17 +17,20 @@ class Paths:
     buddies_file: Path = field(init=False)
     logs_dir: Path = field(init=False)
     docs_dir: Path = field(init=False)
+    running_file: Path = field(init=False)
 
     def __post_init__(self) -> None:
         self.config_file = self.home / "config.json"
         self.buddies_file = self.home / "buddies.json"
         self.logs_dir = self.home / "logs"
         self.docs_dir = self.home / "docs"
+        self.running_file = self.home / "running.json"
 
     def ensure(self) -> None:
         self.home.mkdir(parents=True, exist_ok=True)
         self.logs_dir.mkdir(parents=True, exist_ok=True)
         self.docs_dir.mkdir(parents=True, exist_ok=True)
+        self.running_file.parent.mkdir(parents=True, exist_ok=True)
 
 
 def load_json(path: Path) -> Dict[str, Any]:
