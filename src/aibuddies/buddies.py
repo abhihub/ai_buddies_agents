@@ -16,6 +16,7 @@ class Buddy:
     model: str = "claude-3-5-sonnet-20240620"
     emoji: str = "🤖"
     autorun_interval: str = "manual"
+    autorun_cron: str = ""  # optional cron-like string, e.g., "0 9 * * *"
     screenshot: bool = False
     clipboard: bool = False
     context_sources: List[str] = field(default_factory=list)

@@ -12,6 +12,7 @@ Let non-technical users spin up an AI agent with a single prompt and a couple of
 - JSON storage in `~/.aibuddies`; CLI entrypoint `python -m aibuddies`.
 - LLM adapter: prefers Claude (Agent SDK if present), then OpenAI, else Dummy echo. Default model: `claude-3-5-sonnet-20240620` (override with `--model`). Falls back through haiku/opus if a model is not found.
 - Context sources (stub): pass `--context` (e.g., `screenshot window clipboard docs`) and they’re included as a text block until real collectors are wired.
+- Proactive loop (minimal): `run` starts a scheduler that triggers a proactive check-in based on `--every` (1m/2m/5m/1h/2h/5h). Cron flag is stubbed.
 
 ## Quick start
 ```bash
@@ -26,6 +27,9 @@ python -m aibuddies create --name Doctor --prompt "You are a cautious doctor." -
 python -m aibuddies run --name Doctor   # opens chat window if possible
 # or manually:
 python -m aibuddies chat --name Doctor
+
+# proactive interval (e.g., 1h check-ins)
+python -m aibuddies run --name GymCoach --every 1h
 
 Run tests (stdlib unittest, no deps):
 PYTHONPATH=src python -m unittest

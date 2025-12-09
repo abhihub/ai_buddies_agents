@@ -4,6 +4,7 @@ import shlex
 import shutil
 import subprocess
 import sys
+import time
 from pathlib import Path
 from typing import Dict, Optional
 
@@ -28,11 +29,16 @@ class RuntimeManager:
         self.running: Dict[str, Buddy] = {}
         self.paths = paths or Paths()
         self.paths.ensure()
+        self._scheduler_thread = None
+        self._stop_scheduler = False
+        self._last_tick: Dict[str, float] = {}
 
     def start(self, buddy: Buddy, every: Optional[str] = None, once: bool = False) -> str:
         self.running[buddy.name] = buddy
         mode = "once" if once else every or buddy.autorun_interval
         spawn_note = self._open_chat_window(buddy.name)
+        if not once:
+            self._ensure_scheduler()
         return f"Started {buddy.name} with interval={mode}. {spawn_note}"
 
     def stop(self, name: str) -> bool:
@@ -62,6 +68,54 @@ class RuntimeManager:
         system_plus_persona = f"{buddy.system_prompt}\n\n{buddy.persona_prompt}"
         user_payload = context_block + text
         return client.ask(buddy_name, system_plus_persona, user_payload)
+
+    def proactive_tick(self) -> None:
+        """
+        Iterate running buddies and trigger proactive prompts based on interval.
+        This is minimal: supports autorun_interval (manual/1m/5m/1h/2h/5h).
+        Cron-like strings are not implemented yet.
+        """
+        now = time.time()
+        for buddy in list(self.running.values()):
+            interval = buddy.autorun_interval
+            if interval in ("manual", "", None):
+                continue
+            seconds = self._interval_to_seconds(interval)
+            if seconds is None:
+                continue
+            last = self._last_tick.get(buddy.name, 0)
+            if now - last >= seconds:
+                # fire a proactive prompt
+                prompt = "It's time to check in. Share a quick update or I'll suggest something."
+                self.ask(buddy.name, prompt)
+                self._last_tick[buddy.name] = now
+
+    @staticmethod
+    def _interval_to_seconds(interval: str) -> Optional[int]:
+        mapping = {
+            "1m": 60,
+            "2m": 120,
+            "5m": 300,
+            "1h": 3600,
+            "2h": 7200,
+            "5h": 18000,
+        }
+        return mapping.get(interval)
+
+    def _ensure_scheduler(self) -> None:
+        if self._scheduler_thread:
+            return
+        import threading
+
+        def loop() -> None:
+            while not self._stop_scheduler:
+                try:
+                    self.proactive_tick()
+                finally:
+                    time.sleep(60)  # check every minute
+
+        self._scheduler_thread = threading.Thread(target=loop, daemon=True)
+        self._scheduler_thread.start()
 
     def _open_chat_window(self, buddy_name: str) -> str:
         """

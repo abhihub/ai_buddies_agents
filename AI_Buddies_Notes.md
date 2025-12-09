@@ -11,6 +11,7 @@ python3 -m venv .venv
 - Runtime: stub `RuntimeManager` starts buddies and tries to open a new terminal window for `chat` (macOS via `osascript`, Linux via common terminals). Falls back to printing the command if it can’t auto-open.
 - LLM: prefers Claude if `claude_api_key` is set, then OpenAI if `openai_api_key` is set; otherwise falls back to `DummyLLM`. Claude path uses Agent SDK if available in the `anthropic` client; otherwise plain messages. Install `anthropic` or `openai` SDKs for real calls. System prompt + buddy prompt are combined before sending. Default model: `claude-3-5-sonnet-20240620` (override via `--model`); falls back through haiku/opus if a model is not found.
 - Context: `context_sources` per buddy (e.g., screenshot/window/clipboard/docs) currently stubbed; included as text in the user payload.
+- Proactive loop: scheduler ticks every minute; fires proactive check-ins based on `autorun_interval` (1m/2m/5m/1h/2h/5h). Cron stub not implemented yet.
 
 ## Setup
 - From repo root: `python -m pip install -e .` (uses `pyproject.toml` with src/ layout).
@@ -24,6 +25,7 @@ python3 -m venv .venv
 - `src/aibuddies/runtime.py` — runtime controller stub (tracks running buddies, opens chat window).
 - `src/aibuddies/llm.py` — LLM adapter (Claude/OpenAI preference with Dummy fallback).
 - `src/aibuddies/context.py` — stub context collector.
+- `src/aibuddies/buddies.py` — buddy schema (now includes autorun_cron stub).
 - `src/aibuddies/config.py` — config load/save helpers.
 - `src/aibuddies/__main__.py` — CLI entrypoint.
 

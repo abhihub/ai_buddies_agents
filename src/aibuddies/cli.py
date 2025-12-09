@@ -90,6 +90,9 @@ def cmd_run(args: argparse.Namespace) -> None:
     if args.every:
         buddy.autorun_interval = args.every
         store.update(buddy.name, {"autorun_interval": args.every})
+    if args.cron:
+        buddy.autorun_cron = args.cron
+        store.update(buddy.name, {"autorun_cron": args.cron})
     note = runtime.start(buddy, every=args.every, once=args.once)
     print(note)
 
@@ -240,6 +243,7 @@ def build_parser() -> argparse.ArgumentParser:
     p_run = sub.add_parser("run", help="Run a buddy (starts loop)")
     p_run.add_argument("--name", required=True)
     p_run.add_argument("--every", help="Override interval")
+    p_run.add_argument("--cron", help="Experimental cron string (not implemented)")
     p_run.add_argument("--once", action="store_true", help="Run a single cycle")
     p_run.set_defaults(func=cmd_run)
 
