@@ -13,6 +13,7 @@ python3 -m venv .venv
 - Context: `context_sources` per buddy (e.g., screenshot/window/clipboard/docs) currently stubbed; included as text in the user payload.
 - Proactive loop: scheduler ticks every minute; fires proactive check-ins based on `autorun_interval` (1m/2m/5m/1h/2h/5h). Cron stub not implemented yet.
 - Fixed schedule: `schedule` entries like `HH:MM|Message` enqueue messages once per day when the time matches; chat loop prints them via a background thread.
+- Auto-schedule: if no schedule is set, a heuristic is generated from persona keywords (GymCoach/Doctor/Finance/Tutor/default).
 
 ## Setup
 - From repo root: `python -m pip install -e .` (uses `pyproject.toml` with src/ layout).

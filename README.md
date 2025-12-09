@@ -14,6 +14,7 @@ Let non-technical users spin up an AI agent with a single prompt and a couple of
 - Context sources (stub): pass `--context` (e.g., `screenshot window clipboard docs`) and they’re included as a text block until real collectors are wired.
 - Proactive loop (minimal): `run` starts a scheduler that triggers a proactive check-in based on `--every` (1m/2m/5m/1h/2h/5h). Cron flag is stubbed.
 - Fixed-time schedule: `--schedule "06:00|Wake up" "14:00|How was lunch?"` enqueues messages at matching local HH:MM; printed into chat window via background thread.
+- Auto-schedule: if no schedule is provided, a heuristic is generated from the buddy prompt (e.g., GymCoach gets morning/lunch/gym pings).
 
 ## Quick start
 ```bash

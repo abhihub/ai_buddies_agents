@@ -17,6 +17,7 @@ from .buddies import Buddy, BuddyStore
 from .docs import DocIndex
 from .runtime import RuntimeManager
 from .config import get_config, set_config
+from .schedules import infer_schedule
 
 
 runtime = RuntimeManager()
@@ -96,6 +97,10 @@ def cmd_run(args: argparse.Namespace) -> None:
     if args.schedule:
         buddy.schedule = args.schedule
         store.update(buddy.name, {"schedule": args.schedule})
+    elif not buddy.schedule:
+        auto_sched = infer_schedule(buddy)
+        buddy.schedule = auto_sched
+        store.update(buddy.name, {"schedule": auto_sched})
     note = runtime.start(buddy, every=args.every, once=args.once)
     print(note)
 
