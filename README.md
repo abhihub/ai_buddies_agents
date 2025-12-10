@@ -2,6 +2,9 @@
 
 CLI wrapper around Claude Agent SDK/OpenAI. Create a “buddy” with a prompt, and it will chat and proactively message you on a schedule. All state lives under `~/.aibuddies`.
 
+## Why
+Let non-technical users spin up an AI agent with a single prompt and a couple of optional toggles. The agent picks sane defaults (models, tools, privacy, schedules) based on the prompt so users don’t have to configure anything beyond their intent.
+
 ## TL;DR
 - `python -m aibuddies create --name GymCoach --prompt "You are an upbeat gym coach."`
 - `python -m aibuddies run --name GymCoach` (opens chat; default 1h interval, AI-generated schedule if empty)
