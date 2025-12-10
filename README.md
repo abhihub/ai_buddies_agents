@@ -12,7 +12,7 @@ Let non-technical users spin up an AI agent with a single prompt and a couple of
 - JSON storage in `~/.aibuddies`; CLI entrypoint `python -m aibuddies`.
 - LLM adapter: prefers Claude (Agent SDK if present), then OpenAI, else Dummy echo. Default model: `claude-3-5-sonnet-20240620` (override with `--model`). Falls back through haiku/opus if a model is not found. Claude path caches agents per buddy/model for stateful conversations.
 - Context sources (stub): pass `--context` (e.g., `screenshot window clipboard docs`) and they’re included as a text block until real collectors are wired.
-- Proactive loop (minimal): `run` starts a scheduler that triggers a proactive check-in based on `--every` (1m/2m/5m/1h/2h/5h). Cron flag is stubbed.
+- Proactive loop: `run` starts a scheduler that triggers a proactive check-in based on `--every` (1m/2m/5m/1h/2h/5h). Cron flag is stubbed. Default interval is 1h if not set.
 - Fixed-time schedule: `--schedule "06:00|Wake up" "14:00|How was lunch?"` enqueues messages at matching local HH:MM; printed into chat window via background thread.
 - Auto-schedule: if no schedule is provided, we ask the AI to propose one (HH:MM|Message). If the AI call fails or no API key is set, schedule stays empty.
 - Status: `python -m aibuddies status` reads persisted running state (tracks run/chat starts across processes).
@@ -32,8 +32,8 @@ python -m aibuddies run --name Doctor   # opens chat window if possible
 # or manually:
 python -m aibuddies chat --name Doctor
 
-# proactive interval (e.g., 1h check-ins)
-python -m aibuddies run --name GymCoach --every 1h
+# proactive interval (default 1h check-ins unless overridden)
+python -m aibuddies run --name GymCoach --every 2h
 # fixed times (HH:MM|Message)
 python -m aibuddies run --name GymCoach --schedule "06:00|Good morning. Drink water." "14:00|How was lunch?"
 # AI-generate schedule if none exists (implicit on run)

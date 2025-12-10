@@ -15,7 +15,7 @@ class Buddy:
     )
     model: str = "claude-3-5-sonnet-20240620"
     emoji: str = "🤖"
-    autorun_interval: str = "manual"
+    autorun_interval: str = "1h"
     autorun_cron: str = ""  # optional cron-like string, e.g., "0 9 * * *"
     schedule: List[str] = field(default_factory=list)  # entries like "06:00|Good morning"
     screenshot: bool = False

@@ -103,16 +103,13 @@ class RuntimeManager:
         today = time.strftime("%Y%m%d", time.localtime(now))
         for buddy in list(self.running.values()):
             interval = buddy.autorun_interval
-            if interval in ("manual", "", None):
-                pass
-            else:
-                seconds = self._interval_to_seconds(interval)
-                if seconds is not None:
-                    last = self._last_tick.get(buddy.name, 0)
-                    if now - last >= seconds:
-                        prompt = "It's time to check in. Share a quick update or I'll suggest something."
-                        self.enqueue(buddy.name, prompt)
-                        self._last_tick[buddy.name] = now
+            seconds = self._interval_to_seconds(interval)
+            if seconds is not None:
+                last = self._last_tick.get(buddy.name, 0)
+                if now - last >= seconds:
+                    prompt = "It's time to check in. Share a quick update or I'll suggest something."
+                    self.enqueue(buddy.name, prompt)
+                    self._last_tick[buddy.name] = now
 
             # Fixed schedule entries HH:MM|text
             if buddy.schedule:
