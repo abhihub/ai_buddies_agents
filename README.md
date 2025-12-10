@@ -14,7 +14,7 @@ Let non-technical users spin up an AI agent with a single prompt and a couple of
 - Context sources (stub): pass `--context` (e.g., `screenshot window clipboard docs`) and they’re included as a text block until real collectors are wired.
 - Proactive loop (minimal): `run` starts a scheduler that triggers a proactive check-in based on `--every` (1m/2m/5m/1h/2h/5h). Cron flag is stubbed.
 - Fixed-time schedule: `--schedule "06:00|Wake up" "14:00|How was lunch?"` enqueues messages at matching local HH:MM; printed into chat window via background thread.
-- Auto-schedule: if no schedule is provided, a heuristic is generated from the buddy prompt (e.g., GymCoach gets morning/lunch/gym pings).
+- Auto-schedule: if no schedule is provided, we ask the AI to propose one (HH:MM|Message). If the AI call fails or no API key is set, schedule stays empty.
 - Status: `python -m aibuddies status` reads persisted running state (tracks run/chat starts across processes).
 - Show schedules: `python -m aibuddies schedule show --name GymCoach`
 
@@ -36,6 +36,8 @@ python -m aibuddies chat --name Doctor
 python -m aibuddies run --name GymCoach --every 1h
 # fixed times (HH:MM|Message)
 python -m aibuddies run --name GymCoach --schedule "06:00|Good morning. Drink water." "14:00|How was lunch?"
+# AI-generate schedule if none exists (implicit on run)
+python -m aibuddies run --name GymCoach
 
 Run tests (stdlib unittest, no deps):
 PYTHONPATH=src python -m unittest

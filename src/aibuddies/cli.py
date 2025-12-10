@@ -17,7 +17,7 @@ from .buddies import Buddy, BuddyStore
 from .docs import DocIndex
 from .runtime import RuntimeManager
 from .config import get_config, set_config
-from .schedules import infer_schedule
+from .schedules_llm import generate_schedule
 
 
 runtime = RuntimeManager()
@@ -98,9 +98,15 @@ def cmd_run(args: argparse.Namespace) -> None:
         buddy.schedule = args.schedule
         store.update(buddy.name, {"schedule": args.schedule})
     elif not buddy.schedule:
-        auto_sched = infer_schedule(buddy)
-        buddy.schedule = auto_sched
-        store.update(buddy.name, {"schedule": auto_sched})
+        auto_sched = generate_schedule(buddy)
+        if auto_sched:
+            buddy.schedule = auto_sched
+            store.update(buddy.name, {"schedule": auto_sched})
+            print("Auto-generated schedule from AI:")
+            for entry in auto_sched:
+                print(f"  {entry}")
+        else:
+            print("No schedule set (AI generation failed or unavailable).")
     note = runtime.start(buddy, every=args.every, once=args.once)
     print(note)
 
